@@ -1,29 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, } from "react";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 function App() {
-  let [current, setCurrent] = useState(1);
-  let [data, setData] = useState([]);
-  useEffect(function () {
+  const [data, setData] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const current = searchParams.get("current")
+    ? parseInt(searchParams.get("current"))
+    : 1;
+  const limit = searchParams.get("limit")
+    ? parseInt(searchParams.get("limit"))
+    :4;
+
+  useEffect(() => {
     axios
-      .get(`https://jsonplaceholder.typicode.com/comments?_page=${current}&_limit=4`)
+      .get(
+        `https://jsonplaceholder.typicode.com/comments?_page=${current}&_limit=${limit}`
+      )
       .then((response) => {
-        if (response.status == 200) {
-          return setData(response.data)
+        if (response.status === 200) {
+          setData(response.data);
         }
-      });
-  }, [current]);
-  useEffect(function() {
-    
-  },[])
-  function handlePaginate(event, position) {
-    console.log(position);
-    setCurrent(position)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }, [searchParams, current, limit]);
+
+  function handlePaginate(event, value) {
+    setSearchParams({ current: value, limit });
   }
   return (
     <div className="container mx-auto w-[600px] flex flex-wrap gap-5">
-      { 
+      {
         data.length > 0 && data.map((value, index) => {
           return (
             <div key={index} className="p-3 w-[200px] border rounded-sm mt-5 mb-4 ">
